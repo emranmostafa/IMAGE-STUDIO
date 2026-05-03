@@ -1,0 +1,38 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <!-- Orange square background with rounded corners -->
+  <rect width="128" height="128" fill="#FF6B00" rx="22"/>
+
+  <!-- Inner subtle gradient overlay for depth -->
+  <rect width="128" height="128" fill="url(#grad)" rx="22" opacity="0.35"/>
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFD080"/>
+      <stop offset="100%" stop-color="#CC4400"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rocket body -->
+  <ellipse cx="64" cy="54" rx="18" ry="30" fill="#FFFFFF"/>
+
+  <!-- Rocket nose tip -->
+  <ellipse cx="64" cy="26" rx="18" ry="10" fill="#FFFFFF"/>
+
+  <!-- Rocket window -->
+  <circle cx="64" cy="52" r="9" fill="#FF6B00"/>
+  <circle cx="64" cy="52" r="6" fill="#FFD580"/>
+
+  <!-- Left fin -->
+  <polygon points="46,70 36,92 46,84" fill="#FFD580"/>
+
+  <!-- Right fin -->
+  <polygon points="82,70 92,92 82,84" fill="#FFD580"/>
+
+  <!-- Flame outer -->
+  <ellipse cx="64" cy="97" rx="12" ry="16" fill="#FFD580"/>
+
+  <!-- Flame inner -->
+  <ellipse cx="64" cy="101" rx="7" ry="10" fill="#FFFFFF" opacity="0.85"/>
+
+  <!-- Shine highlight on body -->
+  <ellipse cx="57" cy="40" rx="5" ry="9" fill="#FFFFFF" opacity="0.3" transform="rotate(-15 57 40)"/>
+</svg>

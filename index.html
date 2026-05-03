@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Image Studio v4</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background: #f0f0f0;
+    }
+    #app-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+    #footer {
+      background: #111;
+      color: #888;
+      text-align: center;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      padding: 7px;
+      flex-shrink: 0;
+    }
+    #footer a { color: #bbb; text-decoration: none; }
+    #footer a:hover { color: #fff; }
+
+    /* SIDEBAR */
+    #panel {
+      width: 300px;
+      min-width: 300px;
+      background: #fff;
+      border-right: 1px solid #ddd;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    #panel-inner { padding: 16px; }
+    h3 { font-size: 15px; font-weight: 600; margin-bottom: 14px; color: #111; }
+
+    /* DROP ZONE */
+    #drop {
+      border: 2px dashed #bbb;
+      padding: 16px;
+      text-align: center;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #fafafa;
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 16px;
+      transition: border-color 0.2s;
+    }
+    #drop:hover, #drop.over { border-color: #333; color: #333; }
+
+    /* SECTION HEADERS */
+    .section {
+      margin-bottom: 14px;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .section-title {
+      background: #f5f5f5;
+      padding: 7px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .section-body { padding: 10px; }
+
+    /* CONTROLS */
+    .ctrl { margin-bottom: 10px; }
+    .ctrl:last-child { margin-bottom: 0; }
+    .ctrl-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .ctrl-label { font-size: 12px; color: #444; }
+    .ctrl-val {
+      font-size: 12px;
+      font-weight: 600;
+      color: #111;
+      min-width: 36px;
+      text-align: right;
+    }
+    input[type=range] {
+      width: 100%;
+      accent-color: #222;
+      cursor: pointer;
+    }
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      color: #333;
+      margin-bottom: 6px;
+    }
+
+    /* BUTTONS */
+    .btn {
+      width: 100%;
+      margin-top: 8px;
+      padding: 9px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      border: 1px solid #ccc;
+      background: #fff;
+    }
+    .btn:hover { background: #f5f5f5; }
+    .btn-primary { background: #111; color: #fff; border-color: #111; }
+    .btn-primary:hover { background: #333; }
+
+    #status {
+      font-size: 12px;
+      color: #666;
+      margin-top: 8px;
+      min-height: 16px;
+    }
+
+    /* PREVIEW AREA */
+    #preview-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    #preview-toolbar {
+      padding: 10px 14px;
+      background: #fff;
+      border-bottom: 1px solid #ddd;
+      font-size: 12px;
+      color: #666;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    #preview {
+      flex: 1;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, 150px);
+      gap: 12px;
+      overflow-y: auto;
+      align-content: start;
+    }
+    .thumb {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+    .thumb img {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid transparent;
+      background: #eee;
+      display: block;
+      transition: border-color 0.15s;
+    }
+    .thumb.selected img {
+      border-color: #111;
+      box-shadow: 0 0 0 2px #111;
+    }
+    .thumb-checkbox {
+      position: absolute;
+      top: 7px;
+      left: 7px;
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      z-index: 2;
+      accent-color: #111;
+    }
+    .sim-label {
+      font-size: 11px;
+      margin-top: 5px;
+      color: #666;
+      text-align: center;
+    }
+    .sim-green { color: #1a7f1a; font-weight: 600; }
+    .sim-yellow { color: #b07800; font-weight: 600; }
+    .sim-red { color: #b00020; font-weight: 600; }
+
+    /* toolbar buttons */
+    .toolbar-btn {
+      padding: 4px 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      cursor: pointer;
+      border: 1px solid #ccc;
+      background: #fff;
+      white-space: nowrap;
+    }
+    .toolbar-btn:hover { background: #f0f0f0; }
+    .toolbar-btn-dark { background: #111; color: #fff; border-color: #111; }
+    .toolbar-btn-dark:hover { background: #333; }
+  </style>
+</head>
+<body>
+<div id="app-body">
+<div id="panel">
+  <div id="panel-inner">
+    <h3>Image Studio v4</h3>
+
+    <div id="drop">Drag & Drop or Click to Upload</div>
+    <input type="file" id="fileInput" multiple hidden accept="image/*">
+
+    <!-- UPLOADED IMAGES -->
+    <div class="section">
+      <div class="section-title">Uploaded Images</div>
+      <div class="section-body">
+        <div id="uploadedImages" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
+          <div style="color:#999;font-size:12px;padding:20px;text-align:center;grid-column:1/-1;">No images yet</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OUTPUT -->
+    <div class="section">
+      <div class="section-title">Output</div>
+      <div class="section-body">
+        <div class="ctrl">
+          <div class="ctrl-row">
+            <span class="ctrl-label">Copies per image</span>
+          </div>
+          <input type="number" id="copies" value="2" min="1" max="20"
+            style="width:100%;padding:5px 8px;border:1px solid #ddd;border-radius:5px;font-size:13px">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-row">
+            <span class="ctrl-label">Size variation %</span>
+            <span class="ctrl-val" id="v-sizevar">15</span>
+          </div>
+          <input type="range" id="sizevar" min="0" max="50" value="15">
+        </div>
+        <div class="check-row">
+          <input type="checkbox" id="pro">
+          <span>Pro mode (stronger variation)</span>
+        </div>
+        <div class="check-row">
+          <input type="checkbox" id="stripExif" checked>
+          <span>Remove EXIF data</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- COLOR -->
+    <div class="section">
+      <div class="section-title">Color</div>
+      <div class="section-body">
+        <div class="ctrl">
+          <div class="ctrl-row">
+            <span class="ctrl-label">Color noise</span>
+            <span class="ctrl-val" id="v-color">0</span>
+          </div>
+          <input type="range" id="color" min="0" max="60" value="0">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-row">
+            <span class="ctrl-label">Brightness jitter</span>
+            <span class="ctrl-val" id="v-brightness">0</span>
+          </div>
+          <input type="range" id="brightness" min="0" max="40" value="0">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-row">
+            <span class="ctrl-label">Saturation jitter</span>
+            <span class="ctrl-val" id="v-saturation">0</span>
+          </div>
+          <input type="range" id="saturation" min="0" max="50" value="0">
+        </div>
+      </div>
+    </div>
+
+    <!-- TRANSFORM -->
+    <div class="section">
+      <div class="section-title">Transform</div>
+      <div class="section-body">
+        <div class="ctrl">
+          <div class="ctrl-row">
+            <span class="ctrl-label">Resize % (90–110)</span>
+            <span class="ctrl-val" id="v-resize">100</span>
+          </div>
+          <input type="range" id="resize" min="90" max="110" value="100">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-row">
+            <span class="ctrl-label">Zoom jitter %</span>
+            <span class="ctrl-val" id="v-zoom">5</span>
+          </div>
+          <input type="range" id="zoom" min="0" max="20" value="5">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-row">
+            <span class="ctrl-label">Rotation jitter (deg)</span>
+            <span class="ctrl-val" id="v-rotation">0</span>
+          </div>
+          <input type="range" id="rotation" min="0" max="15" value="0">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-row">
+            <span class="ctrl-label">Crop jitter %</span>
+            <span class="ctrl-val" id="v-crop">5</span>
+          </div>
+          <input type="range" id="crop" min="0" max="15" value="5">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-row">
+            <span class="ctrl-label">Position shift %</span>
+            <span class="ctrl-val" id="v-shift">3</span>
+          </div>
+          <input type="range" id="shift" min="0" max="10" value="3">
+        </div>
+        <div class="check-row" style="margin-top:6px">
+          <input type="checkbox" id="flipH">
+          <span>Random horizontal flip</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUALITY -->
+    <div class="section">
+      <div class="section-title">Quality</div>
+      <div class="section-body">
+        <div class="ctrl">
+          <div class="ctrl-row">
+            <span class="ctrl-label">JPEG quality (%)</span>
+            <span class="ctrl-val" id="v-quality">92</span>
+          </div>
+          <input type="range" id="quality" min="60" max="100" value="92">
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="run">Process Images</button>
+    <button class="btn" id="downloadZip">📦 Download ZIP</button>
+    <button class="btn" id="downloadDirect">⬇ Download All</button>
+    <div id="status"></div>
+  </div>
+</div>
+
+<div id="preview-area">
+  <div id="preview-toolbar">
+    <span id="previewCount">No images processed yet</span>
+    <button class="toolbar-btn" id="selectAll" style="margin-left:auto">Select All</button>
+    <button class="toolbar-btn" id="selectNone">None</button>
+    <button class="toolbar-btn toolbar-btn-dark" id="downloadSelected">⬇ Download Selected</button>
+  </div>
+  <div id="preview"></div>
+</div>
+</div>
+
+<div id="footer">
+  DEVELOPED BY EMRAN MOSTAFA &nbsp;|&nbsp; <a href="https://www.wdesk.com" target="_blank">WWW.WDESK.COM</a>
+</div>
+
+<script src="jszip.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
